@@ -1,14 +1,4 @@
-import math
-
-
 class BNode:
-    """
-    Node
-    [0, 1, 2 ,3 ,4 ,5]
-
-
-    """
-
     def __init__(self, data: list):
         self.parent = None
         self.keys: list = data
@@ -25,7 +15,6 @@ class BNode:
             self.children.append(n)
 
     def add_key(self, key):
-        # sort
         self.keys.append(key)
         self.keys.sort()
 
@@ -100,7 +89,7 @@ class BTree:
 
             left_node.children.sort(key=lambda x: x.keys[-1])
             right_node.children.sort(key=lambda x: x.keys[-1])
-
+        # TODO this can be optimized
         if parent is not None:
             parent.remove_child(node)
             new_node = parent
@@ -167,16 +156,25 @@ class BTree:
             if node.is_leaf or key in node.keys:
                 return node
             else:
-                continuation = 0
-                for idx, child in enumerate(node.children):
-                    # lets brute force the child where it's found and then
-                    # we look within its neighbor if it exists
-                    if key <= child.upper_bound:
-                        # lets see if key is also smaller than parents key idx
-                        if key <= node.keys[idx]:
-                            continuation = idx-1
+                next_child = self._get_next_biggest_smallest_child(key, node)
+                if next_child is None:
+                    raise Exception("Next child can not be none!")
+                return self.search(key, next_child)
 
-                return self.search(key, node.children[continuation])
+    def _get_next_biggest_smallest_child(self, key: int, node: BNode):
+        children_len = len(node.children)
+        assert len(node.keys) == children_len - 1
+        found = False
+        idx = 0
+        if key > node.keys[-1]:
+            return node.children[-1]
+
+        while not found and idx < len(node.keys):
+            if node.keys[idx] > key:
+                found = True
+            else:
+                idx += 1
+        return node.children[idx]
 
     def delete(self):
         pass

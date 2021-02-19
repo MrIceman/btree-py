@@ -140,7 +140,24 @@ class BTreeTest(unittest.TestCase):
         self.assertEquals(True, first_child_layer[1].children[1].is_leaf)
         self.assertEquals(True, first_child_layer[1].children[2].is_leaf)
 
+    def test_finds_proper_node_that_holds_our_key(self):
+        # k = 5 and input values 1..5
+        k = 3
+
+        tree = BTree(k)
+        for i in range(1, 32):
+            tree.insert(i, None)
+
+        root = tree.get_root()
+
+        self.assertTrue(8 in tree._get_next_biggest_smallest_child(3, root).keys)
+        self.assertTrue(4 in tree._get_next_biggest_smallest_child(3, root.children[0]).keys)
+        self.assertTrue(2 in tree._get_next_biggest_smallest_child(3, root.children[0].children[0]).keys)
+        self.assertTrue(3 in tree._get_next_biggest_smallest_child(3, root.children[0].children[0].children[0]).keys)
+        # let's look for 3
+
     def test_buggy_split(self):
+
         # this didn't work before
         tree = BTree(k=5)
         root = BNode([3, 6])
@@ -158,19 +175,38 @@ class BTreeTest(unittest.TestCase):
 
     def test_search(self):
         # k = 5 and input values 1..10
-        k = 5
-
+        k = 195
+        n = 1500000
         tree = BTree(k)
-        for i in range(1, 100):
+        for i in range(0, n):
             tree.insert(i, None)
             if i % 100000 == 0:
                 print(f'{i} inserted')
 
         print(f"root after execution. Height: {tree.height}")
-        key = 5
-        result = tree.search(key)
 
-        print(f"Done {result} key : {key}")
+        for i in range(0, n):
+            result = tree.search(i)
+            self.assertTrue(i in result.keys)
+
+    def test_pick_second_child_as_smallest(self):
+        node = BNode(data=[125, 250, 375, 500])
+        a = BNode([25, 50, 75, 100])
+        b = BNode([150, 175, 200, 225])
+        c = BNode([275, 300, 320, 350])
+        d = BNode([400, 425, 450, 475])
+        e = BNode([525, 550, 575, 600])
+        node.add_child(a)
+        node.add_child(b)
+        node.add_child(c)
+        node.add_child(d)
+        node.add_child(e)
+        k = 5
+        tree = BTree(k)
+
+        result = tree._get_next_biggest_smallest_child(128, node)
+
+        self.assertEqual(b, result)
 
     def test_amount_of_leaf_nodes(self):
         # t = 4 so total amount: 6 + 1 = 7
